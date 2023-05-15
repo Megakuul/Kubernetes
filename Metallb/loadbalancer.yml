@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  annotations:
+    #Enter the external IP here
+    metallb.universe.tf/loadBalancerIPs: 192.168.1.100
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx
+  type: LoadBalancer
