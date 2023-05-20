@@ -10,3 +10,21 @@ Install Metallb with following configurations
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
 ```
+
+Or with Microk8s
+
+```bash
+microk8s enable metallb:<DefaultAddressPool>
+```
+
+If you already have a IP address pool (in microk8s the default is "default-addresspool") you can apply the metallb-example.yaml file
+
+```bash
+microk8s kubectl apply -f metallb-example.yaml
+```
+
+Else you can first apply a  ip-address-pool by changing the address-pool.yaml file and applying it
+
+```bash
+microk8s kubectl apply -f address-pool.yaml
+```
