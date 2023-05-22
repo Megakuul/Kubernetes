@@ -98,10 +98,10 @@ sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
 ```
 
-Set SystemdCgroup to true
+Set SystemdCgroup to true (without this, etcd will not work properly in some containerd versions)
 
 ```bash
-sudo sed s/SystemdCgroup = false/SystemdCgroup = true/g /etc/containerd/config.toml
+sudo sed -i "s/SystemdCgroup = false/SystemdCgroup = true/g" /etc/containerd/config.toml
 ```
 
 Restart and enable Containerd
@@ -149,7 +149,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 Install Pod Network (e.g. flannel)
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 ```
 
 Check Network
@@ -166,6 +166,24 @@ To join the node to the cluster, you'll use the kubeadm join command that was ou
 kubeadm join --token <token> <master-ip>:<master-port> --discovery-token-ca-cert-hash sha256:<hash> --cri-socket /run/containerd/containerd.sock
 ```
 
+### Firewall
+
+You need to open following ports on the Control Plane
+
+```bash
+ufw allow 6443 && \
+ufw allow 2379:2380/tcp && \
+ufw allow 10250 && \
+ufw allow 10251 && \
+ufw allow 10252
+```
+
+And following on the Worker Nodes
+
+```bash
+ufw allow 10250 && \
+ufw allow 30000:32767/tcp
+```
 
 ### Debugging
 
