@@ -98,6 +98,12 @@ sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
 ```
 
+Set SystemdCgroup to true
+
+```bash
+sudo sed s/SystemdCgroup = false/SystemdCgroup = true/g /etc/containerd/config.toml
+```
+
 Restart and enable Containerd
 
 ```bash
