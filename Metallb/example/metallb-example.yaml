@@ -35,7 +35,7 @@ metadata:
   namespace: nginx-example
   name: nginx-lb
   annotations:
-    metallb.universe.tf/address-pool: default-addresspool
+    metallb.universe.tf/address-pool: default-pool
 spec:
   ports:
   - protocol: TCP
