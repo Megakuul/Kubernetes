@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: example-ns
+  annotations:
+    kubernetes.io/ingress.class: traefik
+
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+  - host: "test.domain.com"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: example-svc 
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - test.domain.com
+    secretName: certificate-secret

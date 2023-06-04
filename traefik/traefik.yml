@@ -1,0 +1,77 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik-deployment
+  namespace: example-ns
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-account
+      containers:
+        - name: traefik
+          image: traefik:latest
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          args:
+            - --api.insecure
+            - --providers.kubernetesingress
+            - --entrypoints.web.address=:80
+            - --entrypoints.websecure.address=:443
+            - --entrypoints.websecure.http.tls
+            - --log.level=debug
+            - --providers.kubernetescrd
+            - --providers.kubernetescrd.namespaces=example-ns
+          ports:
+            - name: web
+              containerPort: 80
+            - name: websecure
+              containerPort: 443
+            - name: dashboard
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-service
+  namespace: example-ns
+  annotations:
+    metallb.universe.tf/address-pool: example-metallb-pool
+spec:
+  type: LoadBalancer
+  ports:
+    - name: web
+      targetPort: web
+      port: 80
+    - name: websecure
+      targetPort: websecure
+      port: 443
+  selector:
+    app: traefik
+---
+# Create the Traefik Dashboard Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-dashboard-service
+  namespace: example-ns
+  annotations:
+    metallb.universe.tf/address-pool: example-metallb-pool
+
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: dashboard
+  selector:
+    app: traefik
