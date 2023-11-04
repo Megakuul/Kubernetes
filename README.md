@@ -168,6 +168,15 @@ To join the node to the cluster, you'll use the kubeadm join command that was ou
 kubeadm join --token <token> <master-ip>:<master-port> --discovery-token-ca-cert-hash sha256:<hash> --cri-socket /run/containerd/containerd.sock
 ```
 
+### Single Node (Debugging)
+
+When using a single node cluster (e.g. for debugging purposes) you can remove the taint from the control-plane, this allows it to run user workloads:
+
+```bash
+kubectl taint nodes <yournodename> node-role.kubernetes.io/master-
+```
+**Important**: Don't do this in production, only system relevant services should run on the control-planes.
+
 ### Firewall
 
 You need to open following ports on the Control Plane
