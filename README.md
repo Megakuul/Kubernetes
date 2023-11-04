@@ -173,7 +173,7 @@ kubeadm join --token <token> <master-ip>:<master-port> --discovery-token-ca-cert
 When using a single node cluster (e.g. for debugging purposes) you can remove the taint from the control-plane, this allows it to run user workloads:
 
 ```bash
-kubectl taint nodes <yournodename> node-role.kubernetes.io/master-
+kubectl taint nodes <yournodename> node-role.kubernetes.io/control-plane-
 ```
 **Important**: Don't do this in production, only system relevant services should run on the control-planes.
 
