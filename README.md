@@ -126,10 +126,12 @@ Initialize Kubernetes
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
-Get the token (if you lost the initial one)
+Get new token
 
 ```bash
 sudo kubeadm token create
+# Or list existing tokens if you lost it
+sudo kubeadm token list
 ```
 
 Reset Kubernetes initialization
