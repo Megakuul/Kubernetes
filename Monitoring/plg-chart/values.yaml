@@ -1,0 +1,60 @@
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      retention: 7d
+      retentionSize: "9GB"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: longhorn # Using default longhorn storage class
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi
+
+loki-stack:
+  grafana:
+    enabled: false
+  promtail:
+    enabled: true
+    config:
+      lokiAddress: http://loki:3100/loki/api/v1/push
+      scrapeConfigs:
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_container_name]
+              target_label: container_name
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod_name
+  loki:
+    enabled: true
+    config:
+      compactor:
+        retention_enabled: true
+        retention_delete_delay: 2h
+        retention_delete_worker_count: 150
+      limits_config:
+        enforce_metric_name: false
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
+      retention_period: 168h # 7d
+      max_look_back_period: 168h # 7d
+    # ingester
+    persistence:
+      enabled: true
+      storageClassName: longhorn # Using default longhorn storage class
+      accessModes: ["ReadWriteOnce"]
+      size: 10Gi
+
+grafana:
+  sidecar:
+    datasources:
+      enabled: true
+      label: grafana_datasource
+    dashboards:
+      enabled: true
+      label: grafana_dashboard

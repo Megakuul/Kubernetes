@@ -1,0 +1,5 @@
+Installed Orbstrike-PLG-Addon!
+
+For the Longhorn Cluster, its required to have *open-iscsi* installed on each node.
+
+Make sure *metrics-server* is active and running in your cluster.
