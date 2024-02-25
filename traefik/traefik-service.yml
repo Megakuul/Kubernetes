@@ -6,7 +6,7 @@ metadata:
   labels:
     app: traefik
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: traefik
@@ -21,8 +21,8 @@ spec:
           image: traefik:latest
           resources:
             limits:
-              memory: "256Mi"
-              cpu: "500m"
+              memory: "128Mi"
+              cpu: "100m"
           args:
             - --api.insecure
             - --providers.kubernetesingress
@@ -40,6 +40,7 @@ spec:
             - name: dashboard
               containerPort: 8080
 ---
+# Create integrated loadbalancer (e.g. with metallb)
 apiVersion: v1
 kind: Service
 metadata:
@@ -56,22 +57,32 @@ spec:
     - name: websecure
       targetPort: websecure
       port: 443
+    - name: dashboard
+      targetPort: dashboard
+      port: 8080
   selector:
     app: traefik
 ---
-# Create the Traefik Dashboard Service
+# Or alternatively create a nodeport and use a external loadbalancer
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik-dashboard-service
+  name: traefik-web-service
   namespace: example-ns
-  annotations:
-    metallb.universe.tf/address-pool: example-metallb-pool
-
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
-    - port: 8080
+    - name: web
+      targetPort: web
+      port: 80
+      nodePort: 30100
+    - name: websecure
+      targetPort: websecure
+      port: 443
+      nodePort: 30101
+    - name: dashboard
       targetPort: dashboard
+      port: 8080
+      nodePort: 30102
   selector:
     app: traefik

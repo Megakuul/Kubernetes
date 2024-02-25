@@ -1,3 +1,4 @@
+# Simple example of how to integrate a azure network loadbalancer into a hpa application
 apiVersion: v1
 kind: Namespace
 metadata:
