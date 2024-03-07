@@ -1,20 +1,27 @@
 #!/bin/bash
 
-# This bash script can be used on cloud computers (CentOS, RHEL or AWS Linux) to setup a nat gateway for egress
-# A nat gateway is usually required if the cluster is in a private subnet, so that they can still access public package archives / container images
+# This bash script sets up a NAT gateway using nftables on cloud computers (CentOS, RHEL, AWS Linux)
+# A NAT gateway allows instances in a private subnet to access public package archives / container images
 
-# Install iptables service wrapper
-sudo yum install iptables-services -y
-sudo systemctl enable iptables
-sudo systemctl start iptables
+# Don't forget to disable source/destination check
 
-# Enable ip forwarding
+# Install nftables
+sudo yum install nftables -y
+sudo systemctl enable nftables
+sudo systemctl start nftables
+
+# Enable IP forwarding
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.d/nat_gateway.conf
 # Load kernel parameter live to system
 sudo sysctl -p /etc/sysctl.d/nat_gateway.conf
 
-# Find first BMRU (Broadcast, Multicast, Running, Up) interface (by default it expects only one public interface
+# Find first BMRU (Broadcast, Multicast, Running, Up) interface (by default it expects only one public interface)
 iface=$(netstat -i | grep "BMRU" | awk '{print $1}')
-sudo /sbin/iptables -t nat -A POSTROUTING -o $iface -j MASQUERADE
-sudo /sbin/iptables -F FORWARD
-sudo service iptables save
+
+# Configure NAT masquerading with nftables
+sudo nft add table ip nat
+sudo nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }
+sudo nft add rule ip nat postrouting oif "$iface" masquerade
+
+# Save the nftables configuration
+sudo nft list ruleset > /etc/nftables.conf

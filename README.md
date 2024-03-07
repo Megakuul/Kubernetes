@@ -182,19 +182,21 @@ kubectl taint nodes <yournodename> node-role.kubernetes.io/control-plane-
 You need to open following ports on the Control Plane
 
 ```bash
-ufw allow 6443 && \
-ufw allow 2379:2380/tcp && \
-ufw allow 10250 && \
-ufw allow 10251 && \
-ufw allow 10252
+ufw allow 6443 # API
+ufw allow 2379:2380/tcp # Etcd (must only be opened to other planes)
+ufw allow 10250 # Kubelet port must be opened to worker nodes
+ufw allow 10251 # kube-scheduler (must only be opened to other planes)
+ufw allow 10252 # kube-controller-manager (must only be opened to other planes)
 ```
 
 And following on the Worker Nodes
 
 ```bash
-ufw allow 10250 && \
-ufw allow 30000:32767/tcp
+ufw allow 10250 # Kubelet port must be opened to plane nodes
+ufw allow 30000:32767/tcp # NodePorts used to expose application, expose them as you need it
 ```
+
+When possible restrict access to the ports like described in the comments (e.g. with AWS security groups)
 
 ### Debugging
 
